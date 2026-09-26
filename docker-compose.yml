@@ -43,6 +43,15 @@ services:
       - victoria-metrics
     restart: always
 
+  frontend:
+    build: ./frontend
+    container_name: cracken-frontend
+    ports:
+      - "80:80" # Открываем веб-интерфейс на http://localhost
+    depends_on:
+      - backend
+    restart: always
+
 volumes:
   vm-data:
   grafana-data:
