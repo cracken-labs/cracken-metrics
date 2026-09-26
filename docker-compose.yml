@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:v1.96.0
+    container_name: cracken-vm
+    ports:
+      - "8428:8428"
+    volumes:
+      - vm-data:/victoria-metrics-data
+    command:
+      - '--storageDataPath=/victoria-metrics-data'
+      - '--retentionPeriod=12'
+    restart: always
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: cracken-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    depends_on:
+      - victoria-metrics
+    restart: always
+
+  backend:
+    build: ./backend
+    container_name: cracken-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/code
+    environment:
+      - VM_URL=http://victoria-metrics:8428
+      - GRAFANA_URL=http://grafana:3000
+    depends_on:
+      - victoria-metrics
+    restart: always
+
+volumes:
+  vm-data:
+  grafana-data:
