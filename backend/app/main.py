@@ -5,9 +5,15 @@ from pydantic import BaseModel
 from app.promql_converter import PromQLConverter
 from app.dashboard_generator import GrafanaDashboardGenerator
 from app.moex_worker import moex_worker_loop
+from app.database import create_db_and_tables
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    try:
+        create_db_and_tables()
+        print("🚀 Структура таблиц в PostgreSQL успешно инициализирована.")
+    except Exception as e:
+        print(f"❌ Ошибка инициализации PostgreSQL: {e}")
     # Фоновый воркер запускается строго при старте FastAPI
     worker_task = asyncio.create_task(moex_worker_loop())
     yield

@@ -1,6 +1,18 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cracken-postgres
+    environment:
+      - POSTGRES_USER=cracken_admin
+      - POSTGRES_PASSWORD=cracken_secure_pass
+      - POSTGRES_DB=cracken_control_plane
+    ports:
+      - "5432:5432" # Открываем порт наружу, чтобы вы могли подключиться через DBeaver/DataGrip если надо
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    restart: always
   victoria-metrics:
     image: victoriametrics/victoria-metrics:v1.96.0
     container_name: cracken-vm
@@ -53,5 +65,6 @@ services:
     restart: always
 
 volumes:
+  pg-data:
   vm-data:
   grafana-data:
